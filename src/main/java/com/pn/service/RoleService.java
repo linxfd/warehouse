@@ -23,7 +23,7 @@ public interface RoleService {
     // 分页查询角色
     Page queryRolePage(Page page, Role role);
 
-    // 修改角色状态
+    // 修改角色
     Result updateRoleState(Role role);
 
     // 保存角色
@@ -32,11 +32,13 @@ public interface RoleService {
     //根据用户ids来删除用户的业务方法
     public Result removerRoleByIds(List<Integer> roleIdList);
 
-    List<Auth> findAuthTree(Integer roleId);
+    List<Integer> findAuthTree(Integer roleId);
 
     //给角色授权
     Result saveRoleAuth(AuthDTO authDTO,Integer userId);
 
 
-    void exportData(Page page, Role role, HttpServletResponse response);
+//    byte[] exportData(Page page, Role role, HttpServletResponse response);
+    // 导出角色数据
+    Result exportData2(Page page, Role role);
 }

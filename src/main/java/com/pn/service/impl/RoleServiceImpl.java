@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -65,9 +66,9 @@ public class RoleServiceImpl implements RoleService {
     public Result updateRoleState(Role role) {
         int i = roleMapper.updateRoleState(role);
         if (i > 0){
-            return Result.ok("角色状态修改成功!");
+            return Result.ok("角色描述修改成功!");
         }
-        return Result.err(Result.CODE_ERR_BUSINESS,"角色状态修改失败!");
+        return Result.err(Result.CODE_ERR_BUSINESS,"角色描述修改失败!");
     }
 
     @Override
@@ -106,33 +107,17 @@ public class RoleServiceImpl implements RoleService {
         }
         return Result.err(Result.CODE_ERR_BUSINESS,"角色删除失败!");
     }
-    //注入AuthMapper //TODO 逻辑错误
-    @Autowired
-    private AuthMapper authMapper;
-    @Override
-    public List<Auth> findAuthTree(Integer roleId) {
-//        List<Auth> allAuthList = roleMapper.findAuthTree(roleId);
-        //TODO 逻辑错误
-        List<Auth> allAuthList = authMapper.allAuthTree();
-        Map<Integer, Auth> permissionMap = new HashMap<>();
-        //将所有权限菜单List<Auth>给转换成权限菜单树Map<Auth>
-        allAuthList.forEach(auth -> {
-            permissionMap.put(auth.getAuthId(), auth);
-        });
-        //将所有的子权限添加到对应的父权限中
-        for(Auth auth : allAuthList){
-            if(auth.getParentId() != 0){
-                permissionMap.get(auth.getParentId()).getChildAuth().add(auth);
-            }
-        }
 
-        List<Auth> authList= new ArrayList<>();
-        for(Auth auth : allAuthList){
-            if(auth.getParentId() == 0){
-                authList.add(auth);
-            }
-        }
-        return authList;
+    @Override
+    public List<Integer> findAuthTree(Integer roleId) {
+        //查询所有权限
+        List<Auth> allAuthList = roleMapper.findAuthTree(roleId);
+        //封装权限id
+        List<Integer> roleIdlist = new ArrayList<>();
+        allAuthList.stream().forEach(auth -> {
+            roleIdlist.add(auth.getAuthId());
+        });
+        return roleIdlist;
     }
 
     @Override
@@ -151,62 +136,72 @@ public class RoleServiceImpl implements RoleService {
         return Result.err(Result.CODE_ERR_BUSINESS,"角色权限分配失败!");
     }
 
-    @Override
+//    @Override
+//
+//    public byte[] exportData(Page page, Role role, HttpServletResponse response) {
+//        // 查询数据
+//        Page rolePage = this.queryRolePage(page, role);
+//
+//        // 获取Excel模板输入流
+//        InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/warehouse.xlsx");
+//        if (in == null) {
+//            throw new RuntimeException("Excel模板文件未找到");
+//        }
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//
+//        try (
+//             XSSFWorkbook excel = new XSSFWorkbook(in);
+//
+//             ) {
+//
+////            // 设置响应头以便浏览器识别为下载文件
+////            //设置响应的内容类型（Content-Type），指明服务器发送回客户端的数据格式。
+////            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+////            //设置响应头，告诉浏览器以附件的形式下载
+////            response.setHeader("Content-Disposition", "attachment;filename=roles.xlsx");
+//
+//            // 获取sheet页
+//            XSSFSheet sheet = excel.getSheetAt(0);
+//
+//            // 填充时间
+//            sheet.createRow(0).createCell(0).setCellValue(new Date());
+//
+//            // 填充角色数据
+//            int rowIndex = 1; // 从第二行开始填充数据
+//            for (Role r : (List<Role>) rolePage.getResultList()) {
+//                XSSFRow row = sheet.getRow(rowIndex); // 获取或创建行
+//                if (row == null) {
+//                    row = sheet.createRow(rowIndex);
+//                }
+//
+//                row.createCell(0).setCellValue(r.getRoleId());
+//                row.createCell(1).setCellValue(r.getRoleName());
+//                row.createCell(2).setCellValue(r.getRoleDesc());
+//                row.createCell(3).setCellValue(r.getRoleCode());
+//                row.createCell(4).setCellValue(r.getRoleState());
+//                row.createCell(5).setCellValue(r.getCreateTime());
+//                row.createCell(6).setCellValue(r.getUpdateTime());
+//                row.createCell(7).setCellValue(r.getCreateBy());
+//                row.createCell(8).setCellValue(r.getUpdateBy());
+//
+//                rowIndex++;
+//            }
+//
+//            // 写入输出流并关闭
+//            excel.write(outputStream);
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException("导出Excel失败", e);
+//        }
+//        return outputStream.toByteArray();
+//    }
 
-    public void exportData(Page page, Role role, HttpServletResponse response) {
+    @Override
+    public Result exportData2(Page page, Role role) {
         // 查询数据
         Page rolePage = this.queryRolePage(page, role);
-
-        // 获取Excel模板输入流
-        InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/warehouse.xlsx");
-        if (in == null) {
-            throw new RuntimeException("Excel模板文件未找到");
-        }
-
-        try (
-             XSSFWorkbook excel = new XSSFWorkbook(in);
-             ServletOutputStream outputStream = response.getOutputStream()) {
-
-            // 设置响应头以便浏览器识别为下载文件
-            //设置响应的内容类型（Content-Type），指明服务器发送回客户端的数据格式。
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            //设置响应头，告诉浏览器以附件的形式下载
-            response.setHeader("Content-Disposition", "attachment;filename=roles.xlsx");
-
-            // 获取sheet页
-            XSSFSheet sheet = excel.getSheetAt(0);
-
-            // 填充时间
-            sheet.createRow(0).createCell(0).setCellValue(new Date());
-
-            // 填充角色数据
-            int rowIndex = 1; // 从第二行开始填充数据
-            for (Role r : (List<Role>) rolePage.getResultList()) {
-                XSSFRow row = sheet.getRow(rowIndex); // 获取或创建行
-                if (row == null) {
-                    row = sheet.createRow(rowIndex);
-                }
-
-                row.createCell(0).setCellValue(r.getRoleId());
-                row.createCell(1).setCellValue(r.getRoleName());
-                row.createCell(2).setCellValue(r.getRoleDesc());
-                row.createCell(3).setCellValue(r.getRoleCode());
-                row.createCell(4).setCellValue(r.getRoleState());
-                row.createCell(5).setCellValue(r.getCreateTime());
-                row.createCell(6).setCellValue(r.getUpdateTime());
-                row.createCell(7).setCellValue(r.getCreateBy());
-                row.createCell(8).setCellValue(r.getUpdateBy());
-
-                rowIndex++;
-            }
-
-            // 写入输出流并关闭
-            excel.write(outputStream);
-
-        } catch (IOException e) {
-            throw new RuntimeException("导出Excel失败", e);
-        }
-
+        // 返回数据
+        return Result.ok(rolePage.getResultList());
     }
 
 }

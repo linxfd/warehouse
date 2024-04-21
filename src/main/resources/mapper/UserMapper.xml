@@ -64,6 +64,12 @@
         </where>
         limit #{page.limitIndex},#{page.pageSize}
     </select>
+    <select id="findAuthTree" resultType="java.lang.Integer">
+        select * from auth_info where
+            auth_state = 1
+            and auth_id in (select auth_id from role_auth where role_id in (select role_id from user_role where user_id=#{userId}))
+    </select>
+
 
     <!--public int insertUser(User user)-->
     <insert id="insertUser">

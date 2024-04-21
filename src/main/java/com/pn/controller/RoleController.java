@@ -14,6 +14,10 @@ import com.pn.utils.TokenUtils;
 import com.pn.utils.WarehouseConstants;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -111,6 +115,7 @@ public class RoleController {
         return result;
     }
 
+    //修改角色描述
     @PutMapping("/role-update")
     public Result updateRole(@RequestBody AuthDTO authDTO){
         Role role = new Role();
@@ -126,7 +131,7 @@ public class RoleController {
      */
     @GetMapping("/role-auth")
     public Result AuthList(@RequestParam(required = false)Integer roleId){
-        List<Auth> authList = roleService.findAuthTree(roleId);
+        List<Integer> authList = roleService.findAuthTree(roleId);
         return Result.ok(authList);
     }
 
@@ -145,6 +150,45 @@ public class RoleController {
         return result;
     }
 
+//    /**
+//     * 导出数据
+//     * @param pageNum 当前页码
+//     * @param pageSize 每页显示的行数
+//     * @param roleCode 角色代码
+//     * @param roleName 角色名称
+//     * @param roleState 角色状态
+//     * @param totalNum 总行数
+//     * @param response 响应对象
+//     * @return
+//     */
+//    @GetMapping("/exportTable")
+//    public ResponseEntity<byte[]> exportTable(@RequestParam("pageNum") Integer pageNum,
+//                                              @RequestParam("pageSize") Integer pageSize,
+//                                              @RequestParam("roleCode") String roleCode,
+//                                              @RequestParam("roleName") String roleName,
+//                                              @RequestParam("roleState") String roleState,
+//                                              @RequestParam("totalNum") Integer totalNum,
+//                                              HttpServletResponse response){
+//        Page page = Page.builder()
+//                .pageNum(pageNum)
+//                .pageSize(pageSize)
+//                .totalNum(totalNum)
+//                .build();
+//        Role role = Role.builder()
+//                .roleCode(roleCode)
+//                .roleName(roleName)
+//                .roleState(roleState)
+//                .build();
+//        byte[] bytes = roleService.exportData(page, role, response);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+//        headers.setContentDispositionFormData("attachment", "roles.xlsx");
+//        // 返回响应实体
+//
+////        return Result.ok();
+//        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+//    }
+
     /**
      * 导出数据
      * @param pageNum 当前页码
@@ -153,18 +197,17 @@ public class RoleController {
      * @param roleName 角色名称
      * @param roleState 角色状态
      * @param totalNum 总行数
-     * @param response 响应对象
      * @return
      */
     @GetMapping("/exportTable")
-    public void exportTable(@RequestParam("pageNum") Integer pageNum,
-                              @RequestParam("pageSize") Integer pageSize,
-                              @RequestParam("roleCode") String roleCode,
-                              @RequestParam("roleName") String roleName,
-                              @RequestParam("roleState") String roleState,
-                              @RequestParam("totalNum") Integer totalNum,
-                                HttpServletResponse response){
-        Page page = Page.builder()
+    public Result exportTable(@RequestParam("pageNum") Integer pageNum,
+                                              @RequestParam("pageSize") Integer pageSize,
+                                              @RequestParam("roleCode") String roleCode,
+                                              @RequestParam("roleName") String roleName,
+                                              @RequestParam("roleState") String roleState,
+                                              @RequestParam("totalNum") Integer totalNum
+                                              ){
+                Page page = Page.builder()
                 .pageNum(pageNum)
                 .pageSize(pageSize)
                 .totalNum(totalNum)
@@ -174,7 +217,6 @@ public class RoleController {
                 .roleName(roleName)
                 .roleState(roleState)
                 .build();
-        roleService.exportData(page, role,response);
-//        return Result.ok();
+        return roleService.exportData2(page, role);
     }
 }

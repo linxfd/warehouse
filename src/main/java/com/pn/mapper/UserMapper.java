@@ -49,4 +49,9 @@ public interface UserMapper {
 
 
     void insertUserRole(UserRoleDTO userRoleDTO);
+
+    //根据用户id来查询当前用户所拥有的权限列表
+    List<Integer> findAuthTree(Integer userId);
+
+
 }

@@ -1,8 +1,7 @@
 package com.pn.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Date;
 
@@ -10,7 +9,10 @@ import java.util.Date;
  * 该类是数据库user_info表所对应的实体类
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
+@Builder
 public class User {
 
     //用户id
@@ -40,9 +42,7 @@ public class User {
     //追加一个属性 -- 创建账号的人
     private String getCode;
 
-    //无参构造函数
-    public User() {
-    }
+
 
     //带参构造函数
     public User(int userId, String userCode, String userName,

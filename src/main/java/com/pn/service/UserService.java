@@ -1,5 +1,6 @@
 package com.pn.service;
 
+import com.pn.dto.AuthDTO;
 import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Result;
 import com.pn.entity.Role;
@@ -36,4 +37,13 @@ public interface UserService {
 
     //根据用户id来给用户分配角色的业务方法
     Result assignRole(UserRoleDTO userRoleDTO);
+
+    //导出用户数据
+    Result exportUserData(Page page, User user);
+
+    //根据用户id来查询用户所拥有的权限列表
+    List<Integer> findAuthTree(Integer userId);
+
+    //根据角色id来修改角色所拥有的权限列表
+//    Result saveRoleAuth(AuthDTO authDTO, Integer userId);
 }

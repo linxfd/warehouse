@@ -1,5 +1,6 @@
 package com.pn.controller;
 
+import com.pn.dto.AuthDTO;
 import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Auth;
 import com.pn.entity.Result;
@@ -14,6 +15,7 @@ import com.pn.utils.WarehouseConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -160,9 +162,71 @@ public class UserController {
         return Result.ok(roleList);
    }
 
+   //根据用户id来给用户分配角色的业务方法
    @PutMapping("/assignRole")
    public Result assignRole(@RequestBody UserRoleDTO userRoleDTO){
+
        Result result=userService.assignRole(userRoleDTO);
         return result;
    }
+
+    /**
+     * 根据用户id查询权限
+     * @param userId
+     * @return
+     */
+    @GetMapping("/user-auth")
+    public Result AuthList(@RequestParam(required = false)Integer userId){
+        List<Integer> authList = userService.findAuthTree(userId);
+        return Result.ok(authList);
+    }
+
+    /**
+     * 给角色id授权权限
+     * @param authDTO 里面有角色id和权限id集合
+     * @return
+     */
+    @PutMapping("/auth-grant")
+    public Result authGrant(@RequestBody AuthDTO authDTO,
+                            @RequestHeader(WarehouseConstants.HEADER_TOKEN_NAME) String clientToken) {
+        //从前端返回的token中，解析出当前登录的用户的信息
+        CurrentUser currentUser = tokenUtils.getCurrentUser(clientToken);
+        Integer userId = currentUser.getUserId();
+
+//        Result result = userService.saveRoleAuth(authDTO,userId);
+        return null;
+    }
+
+
+    /**
+     * 导出数据
+     * @param pageNum 当前页码
+     * @param pageSize 每页显示的行数
+     * @param userCode 用户代码
+     * @param userType 用户名称
+     * @param userState 用户状态
+     * @param totalNum 总行数
+     * @return
+     */
+    @GetMapping("/exportTable")
+    public Result exportTable(@RequestParam("pageNum") Integer pageNum,
+                              @RequestParam("pageSize") Integer pageSize,
+                              @RequestParam("userCode") String userCode,
+                              @RequestParam("userState") String userState,
+                              @RequestParam("userType") String userType,
+                              @RequestParam("totalNum") Integer totalNum
+                              ){
+
+        Page page = Page.builder()
+                .pageNum(pageNum)
+                .pageSize(pageSize)
+                .totalNum(totalNum)
+                .build();
+        User user = User.builder()
+                .userCode(userCode)
+                .userState(userState)
+                .userType(userType)
+                .build();
+        return userService.exportUserData(page, user);
+    }
 }

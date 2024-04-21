@@ -1,5 +1,6 @@
 package com.pn.service.impl;
 
+import com.pn.dto.AuthDTO;
 import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Result;
 import com.pn.entity.Role;
@@ -9,8 +10,11 @@ import com.pn.page.Page;
 import com.pn.service.UserService;
 import com.pn.utils.DigestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 //将Service里面的bean注入到Spring的容器中
@@ -20,6 +24,9 @@ public class UserServiceImpl implements UserService {
     //注入UserMapper
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     //根据用户名来查找用户账号的业务方法
     @Override
@@ -118,12 +125,46 @@ public class UserServiceImpl implements UserService {
 
     //给用户分配角色
     @Override
+    @Transactional
     public Result assignRole(UserRoleDTO userRoleDTO) {
         //删除用户之前所有的角色
         userMapper.deleteUserRoleByUid(userRoleDTO.getUserId());
         //添加用户新的角色
         userMapper.insertUserRole(userRoleDTO);
+
+        //删除redis缓存,避免缓存数据与数据库数据不一致
+        stringRedisTemplate.delete(userRoleDTO.getUserId() + ":authTree");
+
         return Result.ok("修改成功用户的角色");
     }
+
+    @Override
+    public Result exportUserData(Page page, User user) {
+        //查询用户数据
+        Page userPage = this.queryUserPage(page, user);
+        //返回用户数据
+        return Result.ok(userPage.getResultList());
+    }
+
+    @Override
+    public List<Integer> findAuthTree(Integer userId) {
+        List<Integer> authTree =userMapper.findAuthTree(userId);
+        return authTree;
+    }
+
+//    @Override
+//    public Result saveRoleAuth(AuthDTO authDTO, Integer userId) {
+//        //先删除角色和权限的关系
+//        userMapper.deleteRoleAuthByRoleIds(Arrays.asList(authDTO.getRoleId()));
+//
+//        //添加角色和权限的关系
+//        int i = roleMapper.insertRoleAuth(authDTO);
+//        if (i > 0){
+//            //删除redis缓存,避免缓存数据与数据库数据不一致
+//            stringRedisTemplate.delete(userId + ":authTree");
+//            return Result.ok("角色权限分配成功!");
+//        }
+//        return Result.err(Result.CODE_ERR_BUSINESS,"角色权限分配失败!");
+//    }
 
 }

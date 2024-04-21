@@ -11,6 +11,8 @@ import java.util.List;
 public class AuthDTO {
     //角色id
     private Integer roleId;
+    //用户id
+    private Integer userId;
     //角色名称
     private String roleName;
     //角色描述

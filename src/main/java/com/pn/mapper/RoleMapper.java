@@ -30,8 +30,7 @@ public interface RoleMapper {
     List<Role> selectRolePage(@Param("page")Page page, @Param("role")Role role);
 
 
-    //修改角色状态的方法
-
+    //根据角色id修改角色
     int updateRoleState(Role role);
 
     //根据角色名查询角色的方法
