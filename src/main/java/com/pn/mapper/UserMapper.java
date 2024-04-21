@@ -1,8 +1,13 @@
 package com.pn.mapper;
 
+import com.pn.dto.UserRoleDTO;
+import com.pn.entity.Role;
 import com.pn.entity.User;
 import com.pn.page.Page;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -34,4 +39,14 @@ public interface UserMapper {
     //根据用户id来重置当前选中账号的密码
     public int updatePwdById(User user);
 
+    //根据用户id来查询当前用户所拥有的角色列表
+    @Select("select * from role where role_id in (select role_id from user_role where user_id=#{userId})")
+    List<Role> findRoleByUserId(Integer userId);
+
+    //根据用户id来删除用户和角色的关联关系的方法
+    @Delete("delete from user_role where user_id=#{userId}")
+    void deleteUserRoleByUid(int userId);
+
+
+    void insertUserRole(UserRoleDTO userRoleDTO);
 }

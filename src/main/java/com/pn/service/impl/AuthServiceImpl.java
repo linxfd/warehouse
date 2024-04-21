@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -44,6 +46,30 @@ public class AuthServiceImpl implements AuthService {
         stringRedisTemplate.opsForValue().set(userId + ":authTree",JSON.toJSONString(authTreeList));
         //响应
         return authTreeList;
+    }
+
+    @Override
+    public List<Auth> allAuthTree() {
+        //先从数据库中查询所有权限菜单
+        List<Auth> allAuthList = authMapper.allAuthTree();
+        Map<Integer, Auth> permissionMap = new HashMap<>();
+        //将所有权限菜单List<Auth>给转换成权限菜单树Map<Auth>
+        allAuthList.forEach(auth -> {
+            permissionMap.put(auth.getAuthId(), auth);
+        });
+        //将所有的子权限添加到对应的父权限中
+        for(Auth auth : allAuthList){
+            if(auth.getParentId() != 0){
+                permissionMap.get(auth.getParentId()).getChildAuth().add(auth);
+            }
+        }
+        List<Auth> authList= new ArrayList<>();
+        for(Auth auth : allAuthList){
+            if(auth.getParentId() == 0){
+                authList.add(auth);
+            }
+        }
+        return authList;
     }
 
     /**

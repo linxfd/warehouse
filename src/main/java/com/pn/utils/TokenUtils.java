@@ -25,8 +25,8 @@ public class TokenUtils {
     private StringRedisTemplate stringRedisTemplate;
 
     //注入token的过期时间
-    @Value("${warehouse.expire-time}")
-    private int expireTime;
+    @Value("${warehouse.token-expire-time}")
+    private int tokenExpireTime;
 
     /**
      * 常量
@@ -38,7 +38,12 @@ public class TokenUtils {
     //token中存放用户真实姓名所对应的名字（此处定义该常量的默认值）
     private static final String CLAIM_NAME_USERNAME = "CLAIM_NAME_USERNAME";
 
-    //生成jwt token
+    /**
+     * 生成jwt token
+     * @param currentUser
+     * @param securityKey
+     * @return
+     */
     private String sign(CurrentUser currentUser,String securityKey){
         //生成token
         String token = JWT.create()
@@ -49,7 +54,7 @@ public class TokenUtils {
                 //定义jwt token d 发行时间
                 .withIssuedAt(new Date())
                 //定义jwt token的有效时间
-                .withExpiresAt(new Date(System.currentTimeMillis()+expireTime*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis()+tokenExpireTime*1000))
                 //通过密钥来指定签名
                 .sign(Algorithm.HMAC256(securityKey));
         return token;
@@ -64,7 +69,7 @@ public class TokenUtils {
         String token = sign(currentUser,password);
         //将获取到的token保存到redis中，并且设置token在redis中的过期时间
         //                                                  过期时间        过期时间单位：秒
-        stringRedisTemplate.opsForValue().set(token,token,expireTime*2, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set(token,token,tokenExpireTime*2, TimeUnit.SECONDS);
         return token;
     }
 

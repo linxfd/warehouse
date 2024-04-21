@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Auth {
-
     //权限菜单id
     private int authId;
     //父权限菜单id
@@ -41,6 +41,7 @@ public class Auth {
     //权限菜单的修改时间
     private Date updateTime;
     //追加的属性 -- List<Auth>集合 -- 用于储存当前权限下的所有菜单
-    private List<Auth> childAuth;
+    private List<Auth> childAuth= new ArrayList<>();
+
 
 }

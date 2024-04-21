@@ -1,9 +1,6 @@
 package com.pn.page;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class Page {
 
     //当前页码
@@ -28,6 +26,8 @@ public class Page {
     private Integer limitIndex;
     //储存当前页查询到的数据的List<?>集合
     private List<?> resultList;
+
+
 
     //计算总页数
     public Integer getPageCount(){

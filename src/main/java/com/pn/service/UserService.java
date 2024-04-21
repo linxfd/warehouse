@@ -1,6 +1,8 @@
 package com.pn.service;
 
+import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Result;
+import com.pn.entity.Role;
 import com.pn.entity.User;
 import com.pn.page.Page;
 
@@ -29,4 +31,9 @@ public interface UserService {
     //根据用户id来重置当前选中账号的密码
     public Result resetPwd(Integer userId);
 
+    //根据用户id来查询用户所拥有的角色列表
+    List<Role> findRoleByUserId(Integer userId);
+
+    //根据用户id来给用户分配角色的业务方法
+    Result assignRole(UserRoleDTO userRoleDTO);
 }

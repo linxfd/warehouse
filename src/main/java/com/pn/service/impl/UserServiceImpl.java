@@ -1,6 +1,8 @@
 package com.pn.service.impl;
 
+import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Result;
+import com.pn.entity.Role;
 import com.pn.entity.User;
 import com.pn.mapper.UserMapper;
 import com.pn.page.Page;
@@ -106,6 +108,22 @@ public class UserServiceImpl implements UserService {
             return Result.ok("密码重置成功!");
         }
         return Result.err(Result.CODE_ERR_BUSINESS,"密码重置失败!");
+    }
+
+    //根据用户id来查询用户所拥有的角色
+    @Override
+    public List<Role> findRoleByUserId(Integer userId) {
+        return userMapper.findRoleByUserId(userId);
+    }
+
+    //给用户分配角色
+    @Override
+    public Result assignRole(UserRoleDTO userRoleDTO) {
+        //删除用户之前所有的角色
+        userMapper.deleteUserRoleByUid(userRoleDTO.getUserId());
+        //添加用户新的角色
+        userMapper.insertUserRole(userRoleDTO);
+        return Result.ok("修改成功用户的角色");
     }
 
 }

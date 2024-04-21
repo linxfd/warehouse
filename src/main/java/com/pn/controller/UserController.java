@@ -1,7 +1,9 @@
 package com.pn.controller;
 
+import com.pn.dto.UserRoleDTO;
 import com.pn.entity.Auth;
 import com.pn.entity.Result;
+import com.pn.entity.Role;
 import com.pn.entity.User;
 import com.pn.page.Page;
 import com.pn.service.AuthService;
@@ -146,4 +148,21 @@ public class UserController {
         return result;
     }
 
+    /**
+     * 根据用户id查询角色的url接口  /user/user-role-list/{userId}
+     * @param userId
+     * @return
+     */
+    @GetMapping("/user-role-list/{userId}")
+   public Result findRoleByUserId(@PathVariable Integer userId){
+
+        List<Role> roleList = userService.findRoleByUserId(userId);
+        return Result.ok(roleList);
+   }
+
+   @PutMapping("/assignRole")
+   public Result assignRole(@RequestBody UserRoleDTO userRoleDTO){
+       Result result=userService.assignRole(userRoleDTO);
+        return result;
+   }
 }

@@ -70,6 +70,21 @@
         insert into user_info(user_code,user_name,user_pwd,user_state,is_delete,create_by,create_time)
         values(#{userCode},#{userName},#{userPwd},0,0,#{createBy},now())
     </insert>
+<!--    <insert id="insertUserRole">-->
+<!--        insert into user_role(role_id,user_id)-->
+<!--        <foreach collection="userRoleDTO.roleCheckList" open="(" close=")" separator="," item="roleName">-->
+<!--            values((select role_id from role where role_name = #{roleName}),#{userId})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+    <insert id="insertUserRole" parameterType="map">
+        INSERT INTO user_role(role_id, user_id)
+        SELECT role_id, #{userId}
+        FROM (
+        <foreach collection="roleCheckList" item="roleName" separator=" UNION ALL ">
+            SELECT role_id FROM role WHERE role_name = #{roleName}
+        </foreach>
+        ) AS role_ids
+    </insert>
 
     <!--public int updateUserState(User user)-->
     <update id="updateUserState">

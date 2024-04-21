@@ -57,7 +57,7 @@ public class SecurityFilter implements Filter {
         urlList.add("/logout");
         //如果包含，就说明是白名单请求
         if(urlList.contains(path)){
-            //递归
+            //递归，放行
             filterChain.doFilter(request,response);
             //中止函数
             return;
@@ -69,7 +69,7 @@ public class SecurityFilter implements Filter {
         String clientToken = request.getHeader(WarehouseConstants.HEADER_TOKEN_NAME);
         //对token进行校验，如果通过则请求放行
         if(StringUtils.hasText(clientToken) && stringRedisTemplate.hasKey(clientToken)){
-            //递归
+            //递归，放行
             filterChain.doFilter(request,response);
             //中止函数
             return;

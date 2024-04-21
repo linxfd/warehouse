@@ -2,6 +2,7 @@ package com.pn.controller;
 
 import com.google.code.kaptcha.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 生成验证码
@@ -24,6 +26,10 @@ public class VerificationCodeController {
     //注入CaptchaConfig配置类中的验证码规则
     @Resource(name = "captchaProducer")
     private Producer captchaProducer;
+
+    //注入验证码的过期时间
+    @Value("${warehouse.captcha-expire-time}")
+    private int captchaExpireTime;
 
     //注入redis模板
     @Autowired
@@ -50,8 +56,8 @@ public class VerificationCodeController {
             //生成验证码图片的文本
             String code = captchaProducer.createText();
 
-            //在redis中保存验证码文本
-            stringRedisTemplate.opsForValue().set(code,code);
+            //在redis中保存验证码文本（只保留60秒）
+            stringRedisTemplate.opsForValue().set(code,code,captchaExpireTime, TimeUnit.SECONDS);
 
             //在内存中保存验证码图片
             BufferedImage bi = captchaProducer.createImage(code);

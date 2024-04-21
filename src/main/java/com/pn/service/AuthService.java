@@ -9,4 +9,7 @@ public interface AuthService {
     //根据用户的id来查询用户权限菜单树的业务方法
     public List<Auth> findAuthTree(int userId);
 
+    //查询所有权限菜单树的业务方法
+    List<Auth> allAuthTree();
+
 }
